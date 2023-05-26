@@ -226,3 +226,172 @@ public class Main extends Application {
                 } catch (FileNotFoundException e) {
                     throw new RuntimeException(e);
                 }
+                
+
+
+
+
+\*
+******************************************************************************************************
+************************************************************************************************************************************
+* Name: Mohaned Khaled Hassan
+* ID: 2001372
+* GitHub: Username: MohandKhh
+*/                
+                
+                
+                
+                try {
+                    for (Line l : PropertiesOfDiagrams.extractLine(oututFile)) {
+                        double xBranch = 0;
+                        double yBranch = 0;
+                        javafx.scene.shape.Line line = null;
+                        ArrayList<Point> points = new ArrayList<>();
+                        for (Block bb : PropertiesOfDiagrams.extractBlocks(oututFile)) {
+                            if (l.blockOut != null && l.blockOut.equals(bb.SID) && !bb.blockMirror)
+                                points.add(bb.calculateRightSidePoints().get(l.orderOut - 1));
+                            if (l.blockOut != null && l.blockOut.equals(bb.SID) && bb.blockMirror)
+                                points.add(bb.calculateLeftSidePoints().get(l.orderOut - 1));
+                        }
+
+                        for (Block bbb : PropertiesOfDiagrams.extractBlocks(oututFile)) {
+                            if (l.blockIn != null && l.blockIn.equals(bbb.SID) && !bbb.blockMirror)
+                                points.add(bbb.calculateLeftSidePoints().get(l.orderIn - 1));
+                            if (l.blockIn != null && l.blockIn.equals(bbb.SID) && bbb.blockMirror)
+                                points.add(bbb.calculateRightSidePoints().get(l.orderIn - 1));
+                        }
+
+                        if (l.pointsLine != null && points.size() == 2) {
+                            l.pointsLine.add(0, points.get(0));
+                            l.pointsLine.add(points.get(1));
+                            double x = l.pointsLine.get(0).x;
+                            double y = l.pointsLine.get(0).y;
+                            for (int i = 1; i < l.pointsLine.size() - 1; i++) {
+                                x += l.pointsLine.get(i).x;
+                                y += l.pointsLine.get(i).y;
+                                line = new javafx.scene.shape.Line(x - l.pointsLine.get(i).x, y - l.pointsLine.get(i).y, x, y);
+                                layout.getChildren().add(line);
+                                line.setStrokeWidth(3);
+                                line.setStroke(Color.web("3399CC"));
+                            }
+                            line = new javafx.scene.shape.Line(x, y, points.get(1).x, points.get(1).y);
+                            line.setStrokeWidth(3);
+                            line.setStroke(Color.web("3399CC"));
+
+                            Polygon arrowhead = new Polygon();
+                            arrowhead.getPoints().addAll(0.0, 0.0, -6.8, 3.5, -6.8, -3.5);
+                            arrowhead.setFill(Color.BLACK);
+                            arrowhead.setStroke(Color.web("3399CC"));
+
+                            // Set the arrowhead position at the end of the line
+                            arrowhead.setLayoutX(line.getEndX());
+                            arrowhead.setLayoutY(line.getEndY());
+                            layout.getChildren().addAll(line, arrowhead);
+                        }
+
+                        if (l.pointsLine == null) {
+                            line = new javafx.scene.shape.Line(points.get(0).x, points.get(0).y, points.get(1).x, points.get(1).y);
+                            line.setStrokeWidth(3);
+                            line.setStroke(Color.web("3399CC"));
+
+                            Polygon arrowhead = new Polygon();
+                            arrowhead.getPoints().addAll(0.0, 0.0, -6.8, 3.5, -6.8, -3.5);
+                            arrowhead.setFill(Color.BLACK);
+                            arrowhead.setStroke(Color.web("3399CC"));
+
+                            // Set the arrowhead position at the end of the line
+                            arrowhead.setLayoutX(line.getEndX());
+                            arrowhead.setLayoutY(line.getEndY());
+                            layout.getChildren().addAll(line, arrowhead);
+                        } else if (l.pointsLine != null && points.size() == 1) {
+                            l.pointsLine.add(0, points.get(0));
+                            double x = l.pointsLine.get(0).x;
+                            double y = l.pointsLine.get(0).y;
+                            for (int i = 1; i < l.pointsLine.size(); i++) {
+                                x += l.pointsLine.get(i).x;
+                                y += l.pointsLine.get(i).y;
+                                line = new javafx.scene.shape.Line(x - l.pointsLine.get(i).x, y - l.pointsLine.get(i).y, x, y);
+                                layout.getChildren().add(line);
+                                line.setStrokeWidth(3);
+                                line.setStroke(Color.web("3399CC"));
+                                xBranch = x;
+                                yBranch = y;
+                            }
+
+                        }
+
+                        if (l.branches != null) {
+                            for (int i = 0; i < l.numOfBranches; i++) {
+                                boolean flagMirror = false;
+                                ArrayList<Point> branchPoints = new ArrayList<>();
+                                branchPoints.add(new Point(xBranch, yBranch));
+                                double x = xBranch;
+                                double y = yBranch;
+                                for (int j = 0; j < l.branches.get(i).numOfPoints; j++) {
+                                    x += l.branches.get(i).pointsBranch.get(j).x;
+                                    y += l.branches.get(i).pointsBranch.get(j).y;
+                                    Point p = new Point(x, y);
+                                    branchPoints.add(p);
+                                }
+                                for (Block bbbb : PropertiesOfDiagrams.extractBlocks(oututFile)) {
+                                    if (l.branches.get(i).blockIn != null && l.branches.get(i).blockIn.equals(bbbb.SID) && !bbbb.blockMirror)
+                                        branchPoints.add(bbbb.calculateLeftSidePoints().get(l.branches.get(i).orderIn - 1));
+                                    if (l.branches.get(i).blockIn != null && l.branches.get(i).blockIn.equals(bbbb.SID) && bbbb.blockMirror) {
+                                        branchPoints.add(bbbb.calculateRightSidePoints().get(l.branches.get(i).orderIn - 1));
+                                        flagMirror = true;
+                                    }
+                                }
+                                for (int j = 1; j <= branchPoints.size() - 1; j++) {
+                                    line = new javafx.scene.shape.Line(branchPoints.get(j - 1).x, branchPoints.get(j - 1).y, branchPoints.get(j).x, branchPoints.get(j).y);
+                                    line.setStrokeWidth(3);
+                                    line.setStroke(Color.web("3399CC"));
+                                    layout.getChildren().add(line);
+                                }
+                                if (flagMirror) {
+                                    Polygon arrowhead = new Polygon();
+                                    arrowhead.getPoints().addAll(0.0, 0.0, 6.8, 3.5, 6.8, -3.5);
+                                    arrowhead.setFill(Color.BLACK);
+                                    arrowhead.setStroke(Color.web("3399CC"));
+
+                                    // Set the arrowhead position at the end of the line
+                                    arrowhead.setLayoutX(branchPoints.get(branchPoints.size() - 1).x);
+                                    arrowhead.setLayoutY(branchPoints.get(branchPoints.size() - 1).y);
+                                    layout.getChildren().addAll(arrowhead);
+                                } else {
+                                    Polygon arrowhead = new Polygon();
+                                    arrowhead.getPoints().addAll(0.0, 0.0, -6.8, 3.5, -6.8, -3.5);
+                                    arrowhead.setFill(Color.BLACK);
+                                    arrowhead.setStroke(Color.web("3399CC"));
+
+                                    // Set the arrowhead position at the end of the line
+                                    arrowhead.setLayoutX(branchPoints.get(branchPoints.size() - 1).x);
+                                    arrowhead.setLayoutY(branchPoints.get(branchPoints.size() - 1).y);
+                                    layout.getChildren().addAll(arrowhead);
+                                }
+                            }
+
+                        }
+                        Circle boldPoint = new Circle(xBranch, yBranch, 2.3);
+                        boldPoint.setFill(Color.BLACK);
+                        boldPoint.setStroke(Color.BLACK);
+                        boldPoint.setStrokeWidth(2);
+                        boldPoint.toFront();
+                        layout.getChildren().add(boldPoint);
+                    }
+                } catch (FileNotFoundException e) {
+                    throw new RuntimeException(e);
+                }
+
+                /////////////////////////////
+                primaryStage.setScene(scene2);
+            });
+            grid.add(lb,35,25);
+            grid.add(btn,35,28);
+
+            primaryStage.setScene(scene1);
+            primaryStage.show();
+
+        }
+}
+
+
